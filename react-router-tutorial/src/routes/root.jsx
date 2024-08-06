@@ -7,9 +7,11 @@ export async function action() {
   return redirect(`/contacts/${contact.id}/edit`);
 }
 
-export async function loader(){
-    const contacts = await getContacts();
-    return { contacts };
+export async function loader({ request }){
+  const url = new URL(request.url);
+  const q = url.searchParams.get("q");
+    const contacts = await getContacts(q);
+    return { contacts, q };
 }
 
 
@@ -17,6 +19,7 @@ export async function loader(){
 export default function Root() {
     const { contacts } = useLoaderData();
     const navigation = useNavigation();
+
   return (
     <>
       <div id="sidebar">
@@ -50,7 +53,7 @@ export default function Root() {
               {contacts.map((contact) => (
                 <li key={contact.id}>
                   
-NavLink
+<NavLink
                     to={`contacts/${contact.id}`}
                     className={({ isActive, isPending }) =>
                       isActive
@@ -59,7 +62,8 @@ NavLink
                         ? "pending"
                         : ""
                     }
-                  
+                    >
+                  </NavLink>
 
                   <NavLink to={`contacts/${contact.id}`}>
                     {contact.first || contact.last ? (
@@ -81,7 +85,11 @@ NavLink
           )}
         </nav>
       </div>
-      <div id="detail">
+      <div 
+      id="detail"
+      className={
+        navigation.state === "loading" ? "loading" : ""
+      }>
       <Outlet />
       </div>
     </>
