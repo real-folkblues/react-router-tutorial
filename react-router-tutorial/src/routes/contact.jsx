@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import { Form, useLoaderData, useFetcher, } from "react-router-dom";
 import { getContact, updateContact } from "../contacts";
 
@@ -5,8 +7,22 @@ import { getContact, updateContact } from "../contacts";
 export async function loader({ params })
 {
   const contact = await getContact(params.contactId);
+  if (!contact) {
+    throw new Response("", {
+      status: 404,
+      statusText: "Not Found",
+    });
+  }
   return { contact };
 }
+
+export async function action({ request, params }) {
+  const formData = await request.formData();
+  return updateContact(params.contactId, {
+    favorite: formData.get("favorite") === "true",
+  });
+}
+
 export default function Contact() {
   const { contact } = useLoaderData();
   
@@ -75,7 +91,10 @@ export default function Contact() {
 
 function Favorite({ contact }) {
   const fetcher = useFetcher();
-  const favorite = contact.favorite;
+  const favorite = fetcher.formData
+  ? fetcher.formData.get("favorite") === "true"
+  : contact.favorite;
+
   return (
     <fetcher.Form method="post">
       <button

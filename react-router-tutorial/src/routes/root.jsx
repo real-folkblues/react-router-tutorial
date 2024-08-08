@@ -1,39 +1,49 @@
-import { Outlet, NavLink, useLoaderData, Form, redirect, useNavigation, useSubmit, } from "react-router-dom";
+import {
+  Outlet,
+  NavLink,
+  useLoaderData,
+  Form,
+  redirect,
+  useNavigation,
+  useSubmit,
+} from "react-router-dom";
+import { useEffect } from "react";
 import { getContacts, createContact } from "../contacts";
-
 
 export async function action() {
   const contact = await createContact();
   return redirect(`/contacts/${contact.id}/edit`);
 }
 
-export async function loader({ request }){
+export async function loader({ request }) {
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
-    const contacts = await getContacts(q);
-    return { contacts, q };
+  const contacts = await getContacts(q);
+  return { contacts, q };
 }
 
-
-
 export default function Root() {
-    const { contacts, q } = useLoaderData();
-    const navigation = useNavigation();
-    const submit = useSubmit();
+  const { contacts, q } = useLoaderData();
+  const navigation = useNavigation();
+  const submit = useSubmit();
 
-    const searching =
+  useEffect(() => {
+    document.getElementById("q").value = q;
+  }, [q]);
+
+  const searching =
     navigation.location &&
-    new URLSearchParams(navigation.location.search).has(
-      "q"
-    );
-
+    new URLSearchParams(navigation.location.search).has("q");
 
   return (
     <>
       <div id="sidebar">
         <h1>React Router Contacts</h1>
         <div>
-          <Form id="search-form" role="search">
+          <Form
+            id="search-form"
+            role="search"
+          >
             <input
               id="q"
               className={searching ? "loading" : ""}
@@ -49,6 +59,7 @@ export default function Root() {
                 });
               }}
             />
+
             <div
               id="search-spinner"
               aria-hidden
@@ -64,22 +75,16 @@ export default function Root() {
           </Form>
         </div>
         <nav>
-        {contacts.length ? (
+          {contacts.length ? (
             <ul>
               {contacts.map((contact) => (
                 <li key={contact.id}>
-                  
-<NavLink
+                  <NavLink
                     to={`contacts/${contact.id}`}
                     className={({ isActive, isPending }) =>
-                      isActive
-                        ? "active"
-                        : isPending
-                        ? "pending"
-                        : ""
+                      isActive ? "active" : isPending ? "pending" : ""
                     }
-                    >
-                  </NavLink>
+                  ></NavLink>
 
                   <NavLink to={`contacts/${contact.id}`}>
                     {contact.first || contact.last ? (
@@ -101,12 +106,11 @@ export default function Root() {
           )}
         </nav>
       </div>
-      <div 
-      id="detail"
-      className={
-        navigation.state === "loading" ? "loading" : ""
-      }>
-      <Outlet />
+      <div
+        id="detail"
+        className={navigation.state === "loading" ? "loading" : ""}
+      >
+        <Outlet />
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-import Contact, {loader as contactLoader, }from "./routes/contact";
+import Contact, {loader as contactLoader, action as contactAction, }from "./routes/contact";
 import Root, {
   loader as rootLoader,
   action as rootAction,
@@ -22,13 +22,18 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     loader: rootLoader,
     action: rootAction,
-    children: [{
+    children: [
+      
+    {
+      errorElement: <ErrorPage />,
+      children: [{
       index: true, element: <Index />
     },
       {
         path: "contacts/:contactId",
         element: <Contact />,
         loader: contactLoader,
+        action: contactAction,
       },
       {
         path: "contacts/:contactId/edit",
@@ -42,6 +47,8 @@ const router = createBrowserRouter([
         errorElement: <div>Oops! There was an error. </div>
       },
     ],
+  },
+],
   },
 ]);
 
